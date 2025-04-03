@@ -7,8 +7,8 @@ def home():
     return '''
     <h1>this is main page<h1>
     <a href="https://www.google.com" target='_blank'>go to google</a> >:)<br>
-    <a href="/about"> go to about page </a>
-    <a href="/message">我要留言</a><br>
+    <a href="/about"> go to about page </a><br>
+    <a href="/message">Leave some message</a><br>
     '''
 
 @app.route('/about')
@@ -21,18 +21,18 @@ def about():
 @app.route('/message')
 def message():
     return '''
-    <h1>留言板</h1>
+    <h1>Message Board</h1>
     <form action="/submit" method="POST">
-        你的名字：<br>
+        Your Name：<br>
         <input type="text" name="name"><br><br>
 
-        留言内容：<br>
+        Message：<br>
         <textarea name="message" rows="4" cols="40"></textarea><br><br>
 
-        <input type="submit" value="提交留言">
+        <input type="submit" value="Submit">
     </form>
     <br>
-    <a href="/">返回主页</a>
+    <a href="/">Back to Main Page</a>
     '''
 
 @app.route('/submit', methods=['POST'])
@@ -40,10 +40,12 @@ def submit():
     name = request.form.get('name')
     msg = request.form.get('message')
 
-    with open("messages.txt", "a", encoding='utf-8') as f:
-        f.write(f"{name}：{msg}\n")
+    print(f"Receive：{name} - {msg}")  # 👉 你可以用这个确认是否收到数据
 
-    return f"谢谢你的留言，{name}！<br><a href='/'>返回主页</a>"
+    with open("messages.txt", "a", encoding='utf-8') as f:
+        f.write(f"{name}: {msg}\n")
+
+    return f"Thank you for your message, {name}! <br><a href='/'>Back</a>"
 
 
 if __name__ == '__main__':
