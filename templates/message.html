@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>留言板</title>
+</head>
+<body>
+    <h1>欢迎留言！</h1>
+
+    <form action="/submit" method="POST">
+        <label>你的名字：</label><br>
+        <input type="text" name="name"><br><br>
+
+        <label>你想说的话：</label><br>
+        <textarea name="message" rows="5" cols="30"></textarea><br><br>
+
+        <input type="submit" value="提交留言">
+    </form>
+
+    <br>
+    <a href="/">返回主页</a>
+</body>
+</html>
