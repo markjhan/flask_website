@@ -40,7 +40,7 @@ def submit():
     name = request.form.get('name')
     msg = request.form.get('message')
 
-    print(f"Receive：{name} - {msg}")  # 👉 你可以用这个确认是否收到数据
+    print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
 
     with open("messages.txt", "a", encoding='utf-8') as f:
         f.write(f"{name}: {msg}\n")
