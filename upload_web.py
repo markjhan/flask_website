@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
+app.config['Secret_Mode'] = False
 
 @app.route('/')
 def home():
+    app.config['Secret_Mode'] = False
     return '''
     <h1>this is main page<h1>
     <a href="https://www.google.com" target='_blank'>go to google</a> >:)<br>
@@ -13,9 +15,10 @@ def home():
 
 @app.route('/secret')
 def secret():
+    app.config['Secret_Mode'] = True
     return '''
     <h1>You find the secret page!<h1>
-    <form action="/dunbar" method="POST">
+    <form action="/submit" method="POST">
         Your Name: <br>
         <input type="text" name="name"><br><br>
         
@@ -27,18 +30,6 @@ def secret():
     <br>
     <a href="/">Back to Main Page</a>
     '''
-
-@app.route('/dunbar', methods=['POST'])
-def dunbar():
-    name = request.form.get('name')
-    msg = request.form.get('secret message')
-
-    print(f"Receive：{name} - {msg}")
-
-    with open("secret_messages.txt", "a", encoding='utf-8') as f:
-        f.write(f"{name} - {msg}\n")
-
-    return f"Thank you for your secret, {name}! <br><a href='/'>Back to Main Page</a>"
 
 @app.route('/about')
 def about():
@@ -70,17 +61,32 @@ def sure():
     return '''
     <h1>ARE YOU SURE YOU WANT TO SEE  THIS PAGE??<h1><br>
     <a href="/secret">I AM SURE</a>'''
+
 @app.route('/submit', methods=['POST'])
 def submit():
-    name = request.form.get('name')
-    msg = request.form.get('message')
+    if not app.config['Secret_Mode']:
+        name = request.form.get('name')
+        msg = request.form.get('message')
 
-    print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
+        print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
 
-    with open("messages.txt", "a", encoding='utf-8') as f:
-        f.write(f"{name}: {msg}\n")
 
-    return f"Thank you for your message, {name}! <br><a href='/'>Back</a>"
+        with open("messages.txt", "a", encoding='utf-8') as f:
+            f.write(f"{name}: {msg}\n")
+
+        return f"Thank you for your message, {name}! <br><a href='/'>Back</a>"
+
+    elif app.config['Secret_Mode']:
+        name = request.form.get('name')
+        msg = request.form.get('secret message')
+
+        print(f"Receive：{name} - {msg}")
+
+        with open("secret_messages.txt", "a", encoding='utf-8') as f:
+            f.write(f"{name} : {msg}\n")
+
+        return f"Thank you for your secret, {name}! <br><a href='/'>Back to Main Page</a>"
+
 
 
 if __name__ == '__main__':
