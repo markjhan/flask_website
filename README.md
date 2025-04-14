@@ -11,7 +11,8 @@ This is the first web project I built using Flask — a tiny website that accept
 - "About" page
 - A message form where users can leave their name and message
 - All messages are stored on the server
-
+- A page to view all past messages
+- A page to view the latest message
 ---
 
 ## What I Learned
