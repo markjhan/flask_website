@@ -10,3 +10,5 @@ Stupid People: Ty smart I didn't know that before :(
 123: None
 poad: poad
 sad man: >:)
+latest: this is the test
+check: This is the message to double check
