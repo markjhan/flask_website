@@ -10,6 +10,7 @@ This is the first web project I built using Flask — a tiny website that accept
 - Homepage with navigation links
 - "About" page
 - A message form where users can leave their name and message
+- A secret message form where uses can leave their secret message (secret messages will not show on the past messages board)
 - All messages are stored on the server
 - A page to view all past messages
 - A page to view the latest message
