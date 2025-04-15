@@ -12,3 +12,12 @@ poad: poad
 sad man: >:)
 latest: this is the test
 check: This is the message to double check
+check botReply: This is a small check about the bot
+Final Check: Final Check
+Final Check: Final Check
+Final Check: Final Check
+Final Check: Final Check
+Final Check: Final Check
+Final Check: Final Check
+check: check bot reply
+Bot: Hi check, thank you for your message! I'm just a simple robot, but I wish you have a good day.

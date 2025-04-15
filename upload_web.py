@@ -30,7 +30,7 @@ def secret():
     <h2>Secret messages will not show on the past messages page.<h2>
     <br>
     <a href="/">Back to Main Page</a><br>
-    <a href="/
+    <a href="/message">Back to Message Page</a>
     '''
 
 @app.route('/past')
@@ -160,11 +160,21 @@ def submit():
 
         print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
 
+        app.config["Secret_Mode"] = False
 
         with open("messages.txt", "a", encoding='utf-8') as f:
             f.write(f"{name}: {msg}\n")
 
-        return f"Thank you for your message, {name}! <br><a href='/'>Back</a>"
+        reply = f"Hi {name}, thank you for your message! I'm just a simple robot, but I wish you have a good day."
+
+        with open("messages.txt", "a", encoding='utf-8') as f:
+            f.write(f"Bot: {reply}")
+            
+        return f"""
+        <h2>Message received!</h2><br>
+        <p><strong>You said: </strong>{msg}</p>
+        <p><strong>Bot replied: </strong>{reply}</p>
+        <a href='/'>Back</a>"""
 
     elif app.config['Secret_Mode']:
         name = request.form.get('name')
@@ -174,6 +184,8 @@ def submit():
 
         with open("secret_messages.txt", "a", encoding='utf-8') as f:
             f.write(f"{name} : {msg}\n")
+
+        app.config["Secret_Mode"] = False
 
         return f"Thank you for your secret, {name}! <br><a href='/'>Back to Main Page</a>"
 
