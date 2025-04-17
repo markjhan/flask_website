@@ -10,7 +10,30 @@ def home():
     <h1>this is main page<h1>
     <a href="/about">Go to About Page </a><br>
     <a href="/message">Go to Message Page</a><br>
+    <a href="/search">Go to Search Page</a>
     '''
+
+@app.route('/search')
+def search():
+    return '''
+    <h1>Search Something</h1>
+    <form action="/search_result" method="POST">
+        SearchMessage: <br>
+        <textarea name="search" rows="4" cols="40"></textarea><br><br>
+        
+        <input type="submit" value="Search">
+    </form>
+    '''
+
+@app.route('/search_result', methods=['POST'])
+def search_result():
+    msg = request.form.get("search")
+    print(f'get{msg}')
+
+    if 'about' in msg.lower():
+        return '''
+        <h2><a href="/about">About</a> the website</h2>
+        '''
 
 @app.route('/secret')
 def secret():
