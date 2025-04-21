@@ -18,11 +18,13 @@ def search():
     return '''
     <h1>Search Something</h1>
     <form action="/search_result" method="POST">
-        SearchMessage: <br>
+        Search: <br>
         <textarea name="search" rows="4" cols="40"></textarea><br><br>
         
         <input type="submit" value="Search">
     </form>
+    <br>
+    <a href='/'>Back to Main Page</a>
     '''
 
 @app.route('/search_result', methods=['POST'])
@@ -35,12 +37,21 @@ def search_result():
         <h2><a href="/about">About</a> the website</h2>
         '''
 
+    if 'message' in msg.lower():
+        return '''
+        <h2><a href="/message">Message</a> Page<br>
+            Check The Latest <a href="/latest">Message</a><br>
+            View All Past <a href="/past">Messages</a><br>
+            Send a Secret <a href="/secret">Message</a></h2>
+        '''
+#This is only a simple search system test, I will try to make it like a real search system later.
+
 @app.route('/secret')
 def secret():
     app.config['Secret_Mode'] = True
     return '''
     <head><title>Secret Page</title></head>
-    <h1>You find the secret page!<h1>
+    <h2>
     <form action="/submit" method="POST">
         Your Name: <br>
         <input type="text" name="name"><br><br>
@@ -50,6 +61,7 @@ def secret():
         
         <input type="submit" value="Submit">
     </form>
+    </h2>
     <h2>Secret messages will not show on the past messages page.<h2>
     <br>
     <a href="/">Back to Main Page</a><br>
@@ -73,7 +85,10 @@ def show_past_messages():
     for line in all_past_messages:
         cleaned_lines += f"<p>{line}</p>"
 
-    cleaned_lines += "<br><a href='/'>Back to Main Page</a>"
+    cleaned_lines += """
+    <br><a href='/'>Back to Main Page</a><br>
+    <a href='/message'>Back to Message Page</a>
+    """
     return f'''
     <head><title>All Past Messages</title></head>
     {cleaned_lines}
@@ -146,17 +161,10 @@ def message():
     </form>
     <br>
     <a href="/">Back to Main Page</a><br>
-    <a href="/sure">Something else here(?)</a><br>
+    <a href="/secret">Send a Secret Message</a><br>
     <a href="/latest">Check the latest message</a><br>
     <a href='/past'>View All Past Messages</a>
     '''
-
-@app.route('/sure')
-def sure():
-    return '''
-    <head><title>CONFIRM</title></head>
-    <h1>ARE YOU SURE YOU WANT TO SEE  THIS PAGE??<h1><br>
-    <a href="/secret">I AM SURE</a>'''
 
 @app.route('/latest')
 def show_latest_message():
@@ -164,7 +172,7 @@ def show_latest_message():
         with open("messages.txt", "r", encoding="utf-8") as f:
             lines = f.readlines()
             if lines:
-                last_message = lines[-1].strip()
+                last_message = lines[-2].strip()
             else:
                 last_message = "(No messages yet.)"
     except FileNotFoundError:
@@ -172,7 +180,9 @@ def show_latest_message():
 
     return f'''
     <head><title>Latest Message</title></head>
-    <h2>Latest message:</h2><p>{last_message}</p><br><a href='/message'>Back to Message Page</a>
+    <h2>Latest message:</h2><p>{last_message}</p><br>
+    <a href='/'>Back to Main Page</a><br>
+    <a href='/message'>Back to Message Page</a>
     '''
 
 @app.route('/submit', methods=['POST'])
@@ -188,7 +198,7 @@ def submit():
         with open("messages.txt", "a", encoding='utf-8') as f:
             f.write(f"{name}: {msg}\n")
 
-        reply = f"Hi {name}, thank you for your message! I'm just a simple robot, but I wish you have a good day."
+        reply = f"Hi {name}, thank you for your message! I'm just a simple robot, but I wish you have a good day" + "\n"
 
         with open("messages.txt", "a", encoding='utf-8') as f:
             f.write(f"Bot: {reply}")
@@ -217,5 +227,5 @@ def submit():
 if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='localhost', port=9090)
 

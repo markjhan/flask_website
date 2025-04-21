@@ -21,3 +21,13 @@ Final Check: Final Check
 Final Check: Final Check
 check: check bot reply
 Bot: Hi check, thank you for your message! I'm just a simple robot, but I wish you have a good day.
+full: check
+Bot: Hi full, thank you for your message! I'm just a simple robot, but I wish you have a good day.
+check: check again
+Bot: Hi check, thank you for your message! I'm just a simple robot, but I wish you have a good day.
+ms: tank
+Bot: Hi ms, thank you for your message! I'm just a simple robot, but I wish you have a good day.
+asd: asd
+Bot: Hi asd, thank you for your message! I'm just a simple robot, but I wish you have a good day
+asdfj: asdfj
+Bot: Hi asdfj, thank you for your message! I'm just a simple robot, but I wish you have a good day
