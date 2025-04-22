@@ -31,3 +31,5 @@ asd: asd
 Bot: Hi asd, thank you for your message! I'm just a simple robot, but I wish you have a good day
 asdfj: asdfj
 Bot: Hi asdfj, thank you for your message! I'm just a simple robot, but I wish you have a good day
+coder: This is a check
+Bot: Hi coder, thank you for your message! I'm just a simple robot, but I wish you have a good day

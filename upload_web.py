@@ -29,22 +29,58 @@ def search():
 
 @app.route('/search_result', methods=['POST'])
 def search_result():
-    msg = request.form.get("search")
-    print(f'get{msg}')
+    msg = request.form.get("search").strip().lower()
+    matches = []
 
-    if 'about' in msg.lower():
-        return '''
-        <h2><a href="/about">About</a> the website</h2>
-        '''
+    search_index = [
+       {
+           'title':'About this website',
+            'url':'/about',
+            'content':'This website is built with Flask. I built this when I was 17.'
+        },
+       {
+           'title':'Message Page',
+           'url':'/message',
+           'content':'Leave your message.'
+       },
+       {
+           'title':'Secret Page',
+           'url':'/secret',
+           'content':'Leave secret message. Secret message will not show on the past messages board.'
+       },
+       {
+           'title':'All Past Messages',
+           'url':'/past',
+           'content':'View all past messages.'
+       },
+       {
+           'title':'Latest Message',
+           'url':'/latest',
+           'content':'Check the latest message'
+       }
+    ]
 
-    if 'message' in msg.lower():
-        return '''
-        <h2><a href="/message">Message</a> Page<br>
-            Check The Latest <a href="/latest">Message</a><br>
-            View All Past <a href="/past">Messages</a><br>
-            Send a Secret <a href="/secret">Message</a></h2>
+    for result in search_index:
+       combined_text = (result['title'] + ' ' + result['content']).lower()
+       if msg in combined_text:
+           matches.append(result)
+
+    html = ""
+
+    for match in matches:
+       html += f"<p><a href={match['url']}>{match['title']}</a></p>"
+
+    if html:
+        return f'''
+        <h2>Search Results:</h2><br>
+        {html}<br><br>
+        <h3><a href='/'>Back to Main Page</a></h3>
         '''
-#This is only a simple search system test, I will try to make it like a real search system later.
+    else:
+        return '''
+        <h2>No results found</h2><br><br>
+        <h3><a href='/'>Back to Main Page</a></h3>
+        '''
 
 @app.route('/secret')
 def secret():
