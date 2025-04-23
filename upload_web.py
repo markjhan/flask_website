@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 app.config['Secret_Mode'] = False
+app.config['get_secret'] = False
 
 @app.route('/')
 def home():
@@ -57,6 +58,11 @@ def search_result():
            'title':'Latest Message',
            'url':'/latest',
            'content':'Check the latest message'
+       },
+       {
+           'title':'Get Message by Code',
+           'url':'/get_secret',
+           'content':'Get the secret messages by a code.'
        }
     ]
 
@@ -85,6 +91,7 @@ def search_result():
 @app.route('/secret')
 def secret():
     app.config['Secret_Mode'] = True
+    app.config['get_secret'] = False
     return '''
     <head><title>Secret Page</title></head>
     <h2>
@@ -95,15 +102,34 @@ def secret():
         SecretMessage: <br>
         <textarea name="secret message" rows="4" cols="40"></textarea><br><br>
         
-        <input type="submit" value="Submit">
+        Secret Code: <br>
+        <input type="text" name="code"><br><br>
+        
+        <input type="submit" value="Submit"><br><br>
     </form>
     </h2>
     <h2>Secret messages will not show on the past messages page.<h2>
     <br>
-    <a href="/">Back to Main Page</a><br>
     <a href="/message">Back to Message Page</a>
     '''
 
+@app.route('/get_message')
+def get_secret_message():
+    app.config['get_secret'] = True
+    app.config['Secret_Mode'] = False
+    return '''
+    <head><title>Get</title></head>
+    <h1>Enter the code to get secret messages</h1>
+    <h2>
+    <form action="/submit" method="POST">
+        Secret Code: <br>
+        <input type="text" name="code"><br><br>
+        
+        <input type="submit" value="Submit"><br><br>
+    <form>
+    <a href='/message'>Back</a>
+    </h2>
+    '''
 @app.route('/past')
 def show_past_messages():
     try:
@@ -122,8 +148,7 @@ def show_past_messages():
         cleaned_lines += f"<p>{line}</p>"
 
     cleaned_lines += """
-    <br><a href='/'>Back to Main Page</a><br>
-    <a href='/message'>Back to Message Page</a>
+    <br><a href='/message'>Back to Message Page</a>
     """
     return f'''
     <head><title>All Past Messages</title></head>
@@ -162,7 +187,7 @@ def about():
     <p>
         Hi, I'm someone who left school in 8th grade and have been self-studying ever since.<br>
         I started learning Python because I wanted to create real things, not just follow tutorials.<br>
-        My hobby is playing the guitar, travelling, and trying different kings of food.<br>
+        My hobby is playing the guitar, travelling, and trying different kinds of food.<br>
         I used to live in Japan for 6 months just by my self, and I'm now living in Vancouver, BC alone as well.<br>
         I'm really proud of myself, cause I applied the visa on my own, and it successfully been approved.<br>
         I was 17 when I wrote all of these. I hope you like this website.<br>
@@ -181,6 +206,8 @@ def about():
 
 @app.route('/message')
 def message():
+    app.config['get_secret'] = False
+    app.config['Secret_Mode'] = False
     return '''
     <head>
     <title>Message Board</title>
@@ -199,7 +226,8 @@ def message():
     <a href="/">Back to Main Page</a><br>
     <a href="/secret">Send a Secret Message</a><br>
     <a href="/latest">Check the latest message</a><br>
-    <a href='/past'>View All Past Messages</a>
+    <a href='/past'>View All Past Messages</a><br>
+    <a href='/get_message'>Get Messages by Code</a>
     '''
 
 @app.route('/latest')
@@ -217,13 +245,12 @@ def show_latest_message():
     return f'''
     <head><title>Latest Message</title></head>
     <h2>Latest message:</h2><p>{last_message}</p><br>
-    <a href='/'>Back to Main Page</a><br>
     <a href='/message'>Back to Message Page</a>
     '''
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    if not app.config['Secret_Mode']:
+    if not app.config['Secret_Mode'] and not app.config['get_secret']:
         name = request.form.get('name')
         msg = request.form.get('message')
 
@@ -243,21 +270,55 @@ def submit():
         <h2>Message received!</h2><br>
         <p><strong>You said: </strong>{msg}</p>
         <p><strong>Bot replied: </strong>{reply}</p>
-        <a href='/'>Back</a>"""
+        <a href='/message'>Back</a>"""
 
-    elif app.config['Secret_Mode']:
+    elif app.config['Secret_Mode'] and not app.config['get_secret']:
         name = request.form.get('name')
         msg = request.form.get('secret message')
+        code = request.form.get('code')
 
         print(f"Receive：{name} - {msg}")
 
         with open("secret_messages.txt", "a", encoding='utf-8') as f:
-            f.write(f"{name} : {msg}\n")
+            f.write(f"{name} : {msg} ---- Code:{code}\n")
 
         app.config["Secret_Mode"] = False
 
-        return f"Thank you for your secret, {name}! <br><a href='/'>Back to Main Page</a>"
+        return f"Thank you for your secret, {name}! <br><a href='/message'>Back to Message Page</a>"
 
+    elif app.config['get_secret'] and not app.config['Secret_Mode']:
+        code_input = request.form.get("code").strip()
+        if code_input:
+            matches = []
+            try:
+                with open("secret_messages.txt", "r", encoding='utf-8') as f:
+                    for line in f:
+                        if f"Code:{code_input}" in line:
+                            cleaned_line = line.replace(f" ---- Code:{code_input}", "")
+                            print(cleaned_line)
+                            matches.append(cleaned_line.strip())
+
+            except FileNotFoundError:
+                return '<p>No message found yet.</p>'
+
+            if matches:
+                result_html = f"<h2>Message for Code: {code_input}</h2>"
+                for msg in matches:
+                    result_html += f"<h3><p>{msg}</p></h3>"
+
+            else:
+                return '''
+                <p>No message found for this code.</p><br>
+                <a href='/message'>Back to Message Page</a>
+                '''
+
+            result_html += "<a href='/message'>Back to Message Page</a>"
+            return result_html
+        else:
+            return '''
+            <p>Please enter a code.</p><br>
+            <a href='/get_message'>Back</a>
+            '''
 
 
 if __name__ == '__main__':
