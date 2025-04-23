@@ -14,6 +14,7 @@ This is the first web project I built using Flask — a tiny website that accept
 - All messages are stored on the server
 - A page to view all past messages
 - A page to view the latest message
+- A search page to search other pages
 ---
 
 ## What I Learned
