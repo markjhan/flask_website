@@ -49,3 +49,13 @@ None: None
 Bot: Hi None, thank you for your message! I'm just a simple robot, but I wish you have a good day
 112: 2221
 Bot: Hi 112, thank you for your message! I'm just a simple robot, but I wish you have a good day
+pop: I'm sad [Label : feeling down]
+Bot: I'm here for you. You're not along.pop: I like python [Label : programming]
+Bot: Python is a great choice. You're doing amazing!pop: how can I get start?
+ [Label : Ask question]
+Bot: Not sure where to start? Try visiting the message page or the about section.pop: haha [Label : simple]
+Bot: Thank you for your message. I appreciate your visit!pop: ? [Label : Ask question]
+Bot: Not sure where to start? Try visiting the message page or the about section.pop: how [Label : Ask question]
+Bot: Not sure where to start? Try visiting the message page or the about section.
+pop: what [Label : Ask question]
+Bot: Not sure where to start? Try visiting the message page or the about section.

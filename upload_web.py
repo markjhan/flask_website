@@ -4,6 +4,29 @@ app = Flask(__name__)
 app.config['Secret_Mode'] = False
 app.config['get_secret'] = False
 
+def analyze_message(messages):
+    emotional_keywords = ["sad", "upset", "tired"]
+    programming_keywords = ["python", "flask", "code"]
+    question_keywords = ["how", "what", "?", "help"]
+    messages = messages.lower()
+    if any(w in messages for w in emotional_keywords):
+        label = "feeling down"
+        reply = "I'm here for you. You're not along."
+
+    elif any(w in messages for w in programming_keywords):
+        label = "programming"
+        reply = "Python is a great choice. You're doing amazing!"
+
+    elif any(w in messages for w in question_keywords):
+        label = "Ask question"
+        reply = 'Not sure where to start? Try visiting the message page or the about section.'
+
+    else:
+        label = "simple"
+        reply = "Thank you for your message. I appreciate your visit!"
+
+    return label, reply
+
 @app.route('/')
 def home():
     app.config['Secret_Mode'] = False
@@ -258,13 +281,13 @@ def submit():
 
         app.config["Secret_Mode"] = False
 
-        with open("messages.txt", "a", encoding='utf-8') as f:
-            f.write(f"{name}: {msg}\n")
-
-        reply = f"Hi {name}, thank you for your message! I'm just a simple robot, but I wish you have a good day" + "\n"
+        label, reply = analyze_message(msg)
 
         with open("messages.txt", "a", encoding='utf-8') as f:
-            f.write(f"Bot: {reply}")
+            f.write(f"{name}: {msg} [Label : {label}]\n")
+
+        with open("messages.txt", "a", encoding='utf-8') as f:
+            f.write(f"Bot: {reply}\n")
             
         return f"""
         <h2>Message received!</h2><br>
