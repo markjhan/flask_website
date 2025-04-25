@@ -1,0 +1,20 @@
+[
+  {
+    "label": "simple",
+    "message": "Jason",
+    "name": "json",
+    "reply": "Thank you for your message. I appreciate your visit!"
+  },
+  {
+    "label": "simple",
+    "message": "test json",
+    "name": "test json",
+    "reply": "Thank you for your message. I appreciate your visit!"
+  },
+  {
+    "label": "feeling down",
+    "message": "sad json",
+    "name": "sad",
+    "reply": "I'm here for you. You're not along."
+  }
+]

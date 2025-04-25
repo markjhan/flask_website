@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, json
 
 app = Flask(__name__)
 app.config['Secret_Mode'] = False
@@ -283,11 +283,27 @@ def submit():
 
         label, reply = analyze_message(msg)
 
-        with open("messages.txt", "a", encoding='utf-8') as f:
-            f.write(f"{name}: {msg} [Label : {label}]\n")
+        new_entry = {
+            "name": name,
+            "message": msg,
+            "label": label,
+            "reply": reply
+        }
 
-        with open("messages.txt", "a", encoding='utf-8') as f:
-            f.write(f"Bot: {reply}\n")
+        try:
+            with open("messages.json", "r", encoding="utf_8") as f:
+                all_messages = json.load(f)
+        except FileNotFoundError:
+            all_messages = []
+
+        all_messages.append(new_entry)
+
+        with open("messages.json", "w", encoding="utf-8") as f:
+            json.dump(all_messages, f, indent=2, ensure_ascii=False)
+
+        # with open("messages.txt", "a", encoding='utf-8') as f:
+        #     f.write(f"{name}: {msg} [Label : {label}]\n")
+        #     f.write(f"Bot: {reply}\n")
             
         return f"""
         <h2>Message received!</h2><br>

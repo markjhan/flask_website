@@ -59,3 +59,5 @@ Bot: Not sure where to start? Try visiting the message page or the about section
 Bot: Not sure where to start? Try visiting the message page or the about section.
 pop: what [Label : Ask question]
 Bot: Not sure where to start? Try visiting the message page or the about section.
+mark: 1234 [Label : simple]
+Bot: Thank you for your message. I appreciate your visit!
