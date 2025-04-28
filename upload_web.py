@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, json
 
 app = Flask(__name__)
-app.config['Secret_Mode'] = False
-app.config['get_secret'] = False
+app.config['mode'] = "normal"
 
 def analyze_message(messages):
     emotional_keywords = ["sad", "upset", "tired"]
@@ -29,7 +28,7 @@ def analyze_message(messages):
 
 @app.route('/')
 def home():
-    app.config['Secret_Mode'] = False
+    app.config['mode'] = "normal"
     return '''
     <h1>this is main page<h1>
     <a href="/about">Go to About Page </a><br>
@@ -73,9 +72,9 @@ def search_result():
            'content':'Leave secret message. Secret message will not show on the past messages board.'
        },
        {
-           'title':'All Past Messages',
-           'url':'/past',
-           'content':'View all past messages.'
+           'title':'Get message by name',
+           'url':'/search_by_name',
+           'content':'search message by a name.'
        },
        {
            'title':'Latest Message',
@@ -83,7 +82,7 @@ def search_result():
            'content':'Check the latest message'
        },
        {
-           'title':'Get Message by Code',
+           'title':'Get Secret Message by Code',
            'url':'/get_secret',
            'content':'Get the secret messages by a code.'
        }
@@ -113,8 +112,7 @@ def search_result():
 
 @app.route('/secret')
 def secret():
-    app.config['Secret_Mode'] = True
-    app.config['get_secret'] = False
+    app.config['mode'] = "secret"
     return '''
     <head><title>Secret Page</title></head>
     <h2>
@@ -138,8 +136,7 @@ def secret():
 
 @app.route('/get_message')
 def get_secret_message():
-    app.config['get_secret'] = True
-    app.config['Secret_Mode'] = False
+    app.config['mode'] = "get_secret"
     return '''
     <head><title>Get</title></head>
     <h1>Enter the code to get secret messages</h1>
@@ -149,34 +146,50 @@ def get_secret_message():
         <input type="text" name="code"><br><br>
         
         <input type="submit" value="Submit"><br><br>
-    <form>
+    </form>
     <a href='/message'>Back</a>
     </h2>
     '''
-@app.route('/past')
-def show_past_messages():
-    try:
-        with open("messages.txt", "r", encoding="utf-8") as f:
-            lines = f.readlines()
-            if lines:
-                all_past_messages = [line.strip() for line in lines]
-            else:
-                all_past_messages = "(No messages yet)"
-    except FileNotFoundError:
-        all_past_messages = "(No messages yet)"
-
-    cleaned_lines ="<h2>All Past Messages: </h2>"
-
-    for line in all_past_messages:
-        cleaned_lines += f"<p>{line}</p>"
-
-    cleaned_lines += """
-    <br><a href='/message'>Back to Message Page</a>
-    """
-    return f'''
-    <head><title>All Past Messages</title></head>
-    {cleaned_lines}
+@app.route('/search_by_name', methods=['GET', 'POST'])
+def search_by_name():
+    app.config['mode'] = "search_by_name"
+    return '''
+    <h1>Enter the Name</h1>
+    <h2>
+    <form action="/submit" method="POST">
+        Name: <br>
+        <input type="text" name="search name"><br><br>
+        
+        <input type="submit" value="Submit"><br><br>
+    </form>
+    <a href="/message">Back</a>
+    </h2>
     '''
+
+
+
+    # try:
+    #     with open("messages.json", "r", encoding="utf-8") as f:
+    #         lines = f.readlines()
+    #         if lines:
+    #             all_past_messages = [line.strip() for line in lines]
+    #         else:
+    #             all_past_messages = "(No messages yet)"
+    # except FileNotFoundError:
+    #     all_past_messages = "(No messages yet)"
+    #
+    # cleaned_lines ="<h2>All Past Messages: </h2>"
+    #
+    # for line in all_past_messages:
+    #     cleaned_lines += f"<p>{line}</p>"
+    #
+    # cleaned_lines += """
+    # <br><a href='/message'>Back to Message Page</a>
+    # """
+    # return f'''
+    # <head><title>All Past Messages</title></head>
+    # {cleaned_lines}
+    # '''
 
 @app.route('/about')
 def about():
@@ -229,8 +242,7 @@ def about():
 
 @app.route('/message')
 def message():
-    app.config['get_secret'] = False
-    app.config['Secret_Mode'] = False
+    app.config['mode'] = "normal"
     return '''
     <head>
     <title>Message Board</title>
@@ -249,8 +261,8 @@ def message():
     <a href="/">Back to Main Page</a><br>
     <a href="/secret">Send a Secret Message</a><br>
     <a href="/latest">Check the latest message</a><br>
-    <a href='/past'>View All Past Messages</a><br>
-    <a href='/get_message'>Get Messages by Code</a>
+    <a href='/get_message'>Get Messages by Code</a><br>
+    <a href='/search_by_name'>Search Messages by name</a><br>
     '''
 
 @app.route('/latest')
@@ -273,34 +285,39 @@ def show_latest_message():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    if not app.config['Secret_Mode'] and not app.config['get_secret']:
+    mode = app.config['mode']
+
+    if mode == "normal":
         name = request.form.get('name')
         msg = request.form.get('message')
 
-        print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
+        if name and msg:
+            print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
 
-        app.config["Secret_Mode"] = False
+            label, reply = analyze_message(msg)
 
-        label, reply = analyze_message(msg)
+            new_entry = {
+                "name": name,
+                "message": msg,
+                "label": label,
+                "reply": reply
+            }
 
-        new_entry = {
-            "name": name,
-            "message": msg,
-            "label": label,
-            "reply": reply
-        }
+            try:
+                with open("messages.json", "r", encoding="utf_8") as f:
+                    all_messages = json.load(f)
+            except FileNotFoundError:
+                all_messages = []
 
-        try:
-            with open("messages.json", "r", encoding="utf_8") as f:
-                all_messages = json.load(f)
-        except FileNotFoundError:
-            all_messages = []
+            all_messages.append(new_entry)
 
-        all_messages.append(new_entry)
-
-        with open("messages.json", "w", encoding="utf-8") as f:
-            json.dump(all_messages, f, indent=2, ensure_ascii=False)
-
+            with open("messages.json", "w", encoding="utf-8") as f:
+                json.dump(all_messages, f, indent=2, ensure_ascii=False)
+        else:
+            return '''
+            <h2>Please enter your name and message.</h2><br>
+            <a href='/message'>Back</a>
+            '''
         # with open("messages.txt", "a", encoding='utf-8') as f:
         #     f.write(f"{name}: {msg} [Label : {label}]\n")
         #     f.write(f"Bot: {reply}\n")
@@ -311,7 +328,7 @@ def submit():
         <p><strong>Bot replied: </strong>{reply}</p>
         <a href='/message'>Back</a>"""
 
-    elif app.config['Secret_Mode'] and not app.config['get_secret']:
+    elif mode == "secret":
         name = request.form.get('name')
         msg = request.form.get('secret message')
         code = request.form.get('code')
@@ -325,7 +342,7 @@ def submit():
 
         return f"Thank you for your secret, {name}! <br><a href='/message'>Back to Message Page</a>"
 
-    elif app.config['get_secret'] and not app.config['Secret_Mode']:
+    elif mode == "get_secret":
         code_input = request.form.get("code").strip()
         if code_input:
             matches = []
@@ -358,6 +375,42 @@ def submit():
             <p>Please enter a code.</p><br>
             <a href='/get_message'>Back</a>
             '''
+
+    elif mode == "search_by_name":
+        search_name = request.form.get("search name").lower().strip()
+        if search_name:
+            matches = []
+            try:
+                with open("messages.json", "r", encoding="utf-8") as f:
+                    all_messages = json.load(f)
+
+                    for result in all_messages:
+                        name = (result['name']).lower()
+                        if search_name == name:
+                            matches.append(result)
+
+                if matches:
+                    html = "<h2>Search Results:</h2><br><br>"
+                    for match in matches:
+                        html += f"<p>{match['message']}</p>"
+                    html += "<br><br><a href='/search_by_name'>Back</a>"
+                    return html
+
+                else:
+                    return '''
+                    <h2>No messages found for this name.</h2>
+                    <br><a href='/search_by_name'>Back</a>
+                    '''
+            except FileNotFoundError:
+                return '''
+                <h2>No message data found.</h2>
+                <br><a href='/message'>Back</a>
+                '''
+        else:
+            return '''
+                <h2>Please enter a name.</h2>
+                <br><a href='/search_by_name'>Back</a>
+                '''
 
 
 if __name__ == '__main__':

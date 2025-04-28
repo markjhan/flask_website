@@ -16,5 +16,29 @@
     "message": "sad json",
     "name": "sad",
     "reply": "I'm here for you. You're not along."
+  },
+  {
+    "label": "simple",
+    "message": "hello hello",
+    "name": "superman",
+    "reply": "Thank you for your message. I appreciate your visit!"
+  },
+  {
+    "label": "simple",
+    "message": "driver",
+    "name": "taxi",
+    "reply": "Thank you for your message. I appreciate your visit!"
+  },
+  {
+    "label": "simple",
+    "message": "",
+    "name": "mark",
+    "reply": "Thank you for your message. I appreciate your visit!"
+  },
+  {
+    "label": "simple",
+    "message": "123",
+    "name": "123",
+    "reply": "Thank you for your message. I appreciate your visit!"
   }
 ]
