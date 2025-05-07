@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, json
+import random
 
 app = Flask(__name__)
 app.config['mode'] = "normal"
@@ -33,7 +34,8 @@ def home():
     <h1>this is main page<h1>
     <a href="/about">Go to About Page </a><br>
     <a href="/message">Go to Message Page</a><br>
-    <a href="/search">Go to Search Page</a>
+    <a href="/search">Go to Search Page</a><br>
+    <a href="/easter_egg">Get a surprise</a><br>
     '''
 
 @app.route('/search')
@@ -265,6 +267,30 @@ def message():
     <a href='/search_by_name'>Search Messages by name</a><br>
     '''
 
+@app.route('/easter_egg')
+def easter_egg():
+    return '''
+    <form action="/random_fact" method="POST">
+        <input type="submit" value="Get a Random Message">
+    </form>
+    <br><a href="/">Back</a>
+    '''
+
+@app.route("/random_fact", methods=['POST'])
+def random_fact():
+    facts = [
+        "You are doing better than you think.",
+        "Every expert was once a beginner.",
+        "Flask is cool, and so are you.",
+        "One small step today is a big step tomorrow.",
+        "You're writing Python like a real developer!"
+    ]
+    chosen = random.choice(facts)
+    return f'''
+    <h2>Your random message: </h2>
+    <p>{chosen}</p>
+    <a href='/easter_egg'>Back</a>
+    '''
 @app.route('/latest')
 def show_latest_message():
     try:
@@ -386,7 +412,7 @@ def submit():
 
                     for result in all_messages:
                         name = (result['name']).lower()
-                        if search_name == name:
+                        if search_name == name.lower():
                             matches.append(result)
 
                 if matches:
