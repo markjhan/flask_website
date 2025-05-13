@@ -1,0 +1,32 @@
+[
+  {
+    "message": "hello this is just a test",
+    "name": "oops",
+    "topic": "test"
+  },
+  {
+    "message": "You should start by printing \"hello world\" if you wanna learn python.",
+    "name": "Mom",
+    "topic": "python"
+  },
+  {
+    "message": "Don't learn python, it's so hard.",
+    "name": "dad",
+    "topic": "python"
+  },
+  {
+    "message": "python is interesting.",
+    "name": "son",
+    "topic": "python"
+  },
+  {
+    "message": "Country music is so good",
+    "name": "7781",
+    "topic": "music"
+  },
+  {
+    "message": "Canada is a beautiful country.",
+    "name": "form",
+    "topic": "trivia"
+  }
+]

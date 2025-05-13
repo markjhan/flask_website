@@ -25,12 +25,6 @@
   },
   {
     "label": "simple",
-    "message": "driver",
-    "name": "taxi",
-    "reply": "Thank you for your message. I appreciate your visit!"
-  },
-  {
-    "label": "simple",
     "message": "",
     "name": "mark",
     "reply": "Thank you for your message. I appreciate your visit!"
