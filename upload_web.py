@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, json, session, redirect
 import random
 
 app = Flask(__name__)
-app.config['mode'] = "normal"
 app.secret_key = "admin1234"
 
 def analyze_message(messages):
@@ -30,13 +29,14 @@ def analyze_message(messages):
 
 @app.route('/')
 def home():
-    app.config['mode'] = "normal"
     return '''
-    <h1>this is main page<h1>
+    <h1>
+    This is main page<br>
     <a href="/about">Go to About Page </a><br>
     <a href="/message">Go to Message Page</a><br>
     <a href="/search">Go to Search Page</a><br>
     <a href="/easter_egg">Get a surprise</a><br>
+    </h1>
     '''
 
 @app.route('/search', methods=['GET', 'POST'])
@@ -112,13 +112,38 @@ def search():
         <a href='/'>Back to Main Page</a>
         '''
 
-@app.route('/secret')
+@app.route('/secret', methods=['GET','POST'])
 def secret():
-    app.config['mode'] = "secret"
+    if request.method == 'POST':
+        name = request.form.get('name')
+        msg = request.form.get('secret message')
+        code = request.form.get('code')
+
+        print(f"Receive：{name} - {msg} - {code}")
+
+        new_entry = {
+            "name": name,
+            "message": msg,
+            "code": code
+        }
+
+        try:
+            with open("secret_messages.json", "r", encoding="utf_8") as f:
+                all_messages = json.load(f)
+        except FileNotFoundError:
+            all_messages = []
+
+        all_messages.append(new_entry)
+
+        with open("secret_messages.json", "w", encoding="utf-8") as f:
+            json.dump(all_messages, f, indent=2, ensure_ascii=False)
+
+        return f"Thank you for your secret, {name}! <br><a href='/message'>Back to Message Page</a>"
+
     return '''
     <head><title>Secret Page</title></head>
     <h2>
-    <form action="/submit" method="POST">
+    <form method="POST">
         Your Name: <br>
         <input type="text" name="name"><br><br>
         
@@ -136,14 +161,46 @@ def secret():
     <a href="/message">Back to Message Page</a>
     '''
 
-@app.route('/get_message')
+@app.route('/get_message', methods=['GET','POST'])
 def get_secret_message():
-    app.config['mode'] = "get_secret"
+    if request.method == 'POST':
+        code_input = request.form.get("code").strip()
+        if code_input:
+            matches = []
+            try:
+                with open("secret_messages.json", "r", encoding='utf-8') as f:
+                    all_messages = json.load(f)
+                    for object in all_messages:
+                        if object['code'] == code_input:
+                            matches.append(object['name'] + " : " + object['message'])
+
+            except FileNotFoundError:
+                return '<p>No message found yet.</p>'
+
+            if matches:
+                result_html = f"<h2>Message for Code: {code_input}</h2>"
+                for msg in matches:
+                    result_html += f"<h3><p>{msg}</p></h3>"
+
+            else:
+                return '''
+                        <p>No message found for this code.</p><br>
+                        <a href='/get_message'>Back</a>
+                        '''
+
+            result_html += "<a href='/get_message'>Back</a>"
+            return result_html
+        else:
+            return '''
+                    <p>Please enter a code.</p><br>
+                    <a href='/get_message'>Back</a>
+                    '''
+
     return '''
     <head><title>Get</title></head>
     <h1>Enter the code to get secret messages</h1>
     <h2>
-    <form action="/submit" method="POST">
+    <form method="POST">
         Secret Code: <br>
         <input type="password" name="code"><br><br>
         
@@ -154,11 +211,46 @@ def get_secret_message():
     '''
 @app.route('/search_by_name', methods=['GET', 'POST'])
 def search_by_name():
-    app.config['mode'] = "search_by_name"
+    if request.method == 'POST':
+        search_name = request.form.get("search name").lower().strip()
+        if search_name:
+            matches = []
+            try:
+                with open("messages.json", "r", encoding="utf-8") as f:
+                    all_messages = json.load(f)
+
+                    for result in all_messages:
+                        name = (result['name']).lower()
+                        if search_name == name.lower():
+                            matches.append(result)
+
+                if matches:
+                    html = "<h2>Search Results:</h2><br><br>"
+                    for match in matches:
+                        html += f"<p>{match['message']}</p>"
+                    html += "<br><br><a href='/search_by_name'>Back</a>"
+                    return html
+
+                else:
+                    return '''
+                            <h2>No messages found for this name.</h2>
+                            <br><a href='/search_by_name'>Back</a>
+                            '''
+            except FileNotFoundError:
+                return '''
+                        <h2>No message data found.</h2>
+                        <br><a href='/message'>Back</a>
+                        '''
+        else:
+            return '''
+                        <h2>Please enter a name.</h2>
+                        <br><a href='/search_by_name'>Back</a>
+                        '''
+
     return '''
     <h1>Enter the Name</h1>
     <h2>
-    <form action="/submit" method="POST">
+    <form method="POST">
         Name: <br>
         <input type="text" name="search name"><br><br>
         
@@ -217,15 +309,52 @@ def about():
     <a href="/">Back to Main Page</a>
     '''
 
-@app.route('/message')
+@app.route('/message', methods=['GET','POST'])
 def message():
-    app.config['mode'] = "normal"
+    if request.method == 'POST':
+        name = request.form.get('name')
+        msg = request.form.get('message')
+
+        if name and msg:
+            print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
+
+            label, reply = analyze_message(msg)
+
+            new_entry = {
+                "name": name,
+                "message": msg,
+                "label": label,
+                "reply": reply
+            }
+
+            try:
+                with open("messages.json", "r", encoding="utf_8") as f:
+                    all_messages = json.load(f)
+            except FileNotFoundError:
+                all_messages = []
+
+            all_messages.append(new_entry)
+
+            with open("messages.json", "w", encoding="utf-8") as f:
+                json.dump(all_messages, f, indent=2, ensure_ascii=False)
+        else:
+            return '''
+                    <h2>Please enter your name and message.</h2><br>
+                    <a href='/message'>Back</a>
+                    '''
+
+        return f"""
+                <h2>Message received!</h2><br>
+                <p><strong>You said: </strong>{msg}</p>
+                <p><strong>Bot replied: </strong>{reply}</p>
+                <a href='/message'>Back</a>"""
+
     return '''
     <head>
     <title>Message Board</title>
     </head>
     <h1>Message Board</h1>
-    <form action="/submit" method="POST">
+    <form method="POST">
         Your Name:<br>
         <input type="text" name="name"><br><br>
 
@@ -257,8 +386,8 @@ def topic():
 @app.route('/topic_message', methods=['GET', 'POST'])
 def topic_message():
     if request.method == 'POST':
-        name = request.form.get('name(topic)')
-        msg = request.form.get('message(topic)')
+        name = request.form.get('name_topic')
+        msg = request.form.get('message_topic')
         topics = request.form.get('topic')
 
         if name and msg and topics:
@@ -271,14 +400,14 @@ def topic_message():
             }
 
             try:
-                with open("messages(topic).json", "r", encoding="utf_8") as f:
+                with open("messages_topic.json", "r", encoding="utf_8") as f:
                     all_messages = json.load(f)
             except FileNotFoundError:
                 all_messages = []
 
             all_messages.append(new_entry)
 
-            with open("messages(topic).json", "w", encoding="utf-8") as f:
+            with open("messages_topic.json", "w", encoding="utf-8") as f:
                 json.dump(all_messages, f, indent=2, ensure_ascii=False)
         else:
             return '''
@@ -296,10 +425,10 @@ def topic_message():
     <h1>Topic Message Board</h1>
     <form method="POST">
         Your Name:<br>
-        <input type="text" name="name(topic)"><br><br>
+        <input type="text" name="name_topic"><br><br>
 
         Message:<br>
-        <textarea name="message(topic)" rows="4" cols="40"></textarea><br><br>
+        <textarea name="message_topic" rows="4" cols="40"></textarea><br><br>
         
         Topic:<br>
         <input type="text" name="topic"><br><br>
@@ -316,7 +445,7 @@ def topic_view():
         if search_topic:
             matches = []
             try:
-                with open("messages(topic).json", "r", encoding="utf-8") as f:
+                with open("messages_topic.json", "r", encoding="utf-8") as f:
                     all_messages = json.load(f)
 
                     for result in all_messages:
@@ -349,7 +478,7 @@ def topic_view():
 
     msgs = []
     try:
-        with open("messages(topic).json", "r", encoding="utf-8") as f:
+        with open("messages_topic.json", "r", encoding="utf-8") as f:
             all_messages = json.load(f)
         for result in all_messages:
             msg = (result['message'])
@@ -376,7 +505,7 @@ def topic_admin():
     if not session.get("admin_logged_in"):
         return redirect("/password_admin")
 
-    with open("messages(topic).json", "r", encoding="utf-8") as f:
+    with open("messages_topic.json", "r", encoding="utf-8") as f:
         all_messages = json.load(f)
 
     html = "<h2>Admin Panel: Manage Messages</h2><br>"
@@ -396,13 +525,13 @@ def delete_message(idx):
         return redirect("/password_admin")
 
     try:
-        with open("messages(topic).json", "r", encoding="utf-8") as f:
+        with open("messages_topic.json", "r", encoding="utf-8") as f:
             all_messages = json.load(f)
 
         if 0 <= idx < len(all_messages):
             all_messages.pop(idx)
 
-        with open("messages(topic).json", "w", encoding="utf-8") as f:
+        with open("messages_topic.json", "w", encoding="utf-8") as f:
             json.dump(all_messages, f, indent=2, ensure_ascii=False)
 
     except FileNotFoundError:
@@ -433,37 +562,38 @@ def logout_admin():
     return redirect("/topic")
 
 
-@app.route('/easter_egg')
+@app.route('/easter_egg', methods=['GET','POST'])
 def easter_egg():
+    if request.method == 'POST':
+        facts = [
+            "You are doing better than you think.",
+            "Every expert was once a beginner.",
+            "Flask is cool, and so are you.",
+            "One small step today is a big step tomorrow.",
+            "You're writing Python like a real developer!"
+        ]
+        chosen = random.choice(facts)
+        return f'''
+            <h2>Your random message: </h2>
+            <p>{chosen}</p>
+            <a href='/easter_egg'>Back</a>
+            '''
+
     return '''
-    <form action="/random_fact" method="POST">
+    <form method="POST">
         <input type="submit" value="Get a Random Message">
     </form>
     <br><a href="/">Back</a>
     '''
 
-@app.route("/random_fact", methods=['POST'])
-def random_fact():
-    facts = [
-        "You are doing better than you think.",
-        "Every expert was once a beginner.",
-        "Flask is cool, and so are you.",
-        "One small step today is a big step tomorrow.",
-        "You're writing Python like a real developer!"
-    ]
-    chosen = random.choice(facts)
-    return f'''
-    <h2>Your random message: </h2>
-    <p>{chosen}</p>
-    <a href='/easter_egg'>Back</a>
-    '''
 @app.route('/latest')
 def show_latest_message():
     try:
-        with open("messages.txt", "r", encoding="utf-8") as f:
-            lines = f.readlines()
-            if lines:
-                last_message = lines[-2].strip()
+        with open("messages.json", "r", encoding="utf-8") as f:
+            all_messages = json.load(f)
+            if all_messages:
+                last_list = all_messages[-1]
+                last_message = (last_list['name'] + ' : ' + last_list['message'])
             else:
                 last_message = "(No messages yet.)"
     except FileNotFoundError:
@@ -474,135 +604,6 @@ def show_latest_message():
     <h2>Latest message:</h2><p>{last_message}</p><br>
     <a href='/message'>Back to Message Page</a>
     '''
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    mode = app.config['mode']
-
-    if mode == "normal":
-        name = request.form.get('name')
-        msg = request.form.get('message')
-
-        if name and msg:
-            print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
-
-            label, reply = analyze_message(msg)
-
-            new_entry = {
-                "name": name,
-                "message": msg,
-                "label": label,
-                "reply": reply
-            }
-
-            try:
-                with open("messages.json", "r", encoding="utf_8") as f:
-                    all_messages = json.load(f)
-            except FileNotFoundError:
-                all_messages = []
-
-            all_messages.append(new_entry)
-
-            with open("messages.json", "w", encoding="utf-8") as f:
-                json.dump(all_messages, f, indent=2, ensure_ascii=False)
-        else:
-            return '''
-            <h2>Please enter your name and message.</h2><br>
-            <a href='/message'>Back</a>
-            '''
-        # with open("messages.txt", "a", encoding='utf-8') as f:
-        #     f.write(f"{name}: {msg} [Label : {label}]\n")
-        #     f.write(f"Bot: {reply}\n")
-            
-        return f"""
-        <h2>Message received!</h2><br>
-        <p><strong>You said: </strong>{msg}</p>
-        <p><strong>Bot replied: </strong>{reply}</p>
-        <a href='/message'>Back</a>"""
-
-    elif mode == "secret":
-        name = request.form.get('name')
-        msg = request.form.get('secret message')
-        code = request.form.get('code')
-
-        print(f"Receive：{name} - {msg}")
-
-        with open("secret_messages.txt", "a", encoding='utf-8') as f:
-            f.write(f"{name} : {msg} ---- Code:{code}\n")
-
-        app.config["Secret_Mode"] = False
-
-        return f"Thank you for your secret, {name}! <br><a href='/message'>Back to Message Page</a>"
-
-    elif mode == "get_secret":
-        code_input = request.form.get("code").strip()
-        if code_input:
-            matches = []
-            try:
-                with open("secret_messages.txt", "r", encoding='utf-8') as f:
-                    for line in f:
-                        if f"Code:{code_input}" in line:
-                            cleaned_line = line.replace(f" ---- Code:{code_input}", "")
-                            print(cleaned_line)
-                            matches.append(cleaned_line.strip())
-
-            except FileNotFoundError:
-                return '<p>No message found yet.</p>'
-
-            if matches:
-                result_html = f"<h2>Message for Code: {code_input}</h2>"
-                for msg in matches:
-                    result_html += f"<h3><p>{msg}</p></h3>"
-
-            else:
-                return '''
-                <p>No message found for this code.</p><br>
-                <a href='/message'>Back to Message Page</a>
-                '''
-
-            result_html += "<a href='/message'>Back to Message Page</a>"
-            return result_html
-        else:
-            return '''
-            <p>Please enter a code.</p><br>
-            <a href='/get_message'>Back</a>
-            '''
-
-    elif mode == "search_by_name":
-        search_name = request.form.get("search name").lower().strip()
-        if search_name:
-            matches = []
-            try:
-                with open("messages.json", "r", encoding="utf-8") as f:
-                    all_messages = json.load(f)
-
-                    for result in all_messages:
-                        name = (result['name']).lower()
-                        if search_name == name.lower():
-                            matches.append(result)
-
-                if matches:
-                    html = "<h2>Search Results:</h2><br><br>"
-                    for match in matches:
-                        html += f"<p>{match['message']}</p>"
-                    html += "<br><br><a href='/search_by_name'>Back</a>"
-                    return html
-
-                else:
-                    return '''
-                    <h2>No messages found for this name.</h2>
-                    <br><a href='/search_by_name'>Back</a>
-                    '''
-            except FileNotFoundError:
-                return '''
-                <h2>No message data found.</h2>
-                <br><a href='/message'>Back</a>
-                '''
-        else:
-            return '''
-                <h2>Please enter a name.</h2>
-                <br><a href='/search_by_name'>Back</a>
-                '''
 
 if __name__ == '__main__':
     import os
