@@ -1,32 +1,38 @@
 [
   {
-    "message": "hello this is just a test",
-    "name": "oops",
-    "topic": "test"
-  },
-  {
     "message": "You should start by printing \"hello world\" if you wanna learn python.",
     "name": "Mom",
+    "time": "2025-05-21 11:41",
     "topic": "python"
   },
   {
     "message": "Don't learn python, it's so hard.",
     "name": "dad",
+    "time": "2025-05-21 11:41",
     "topic": "python"
   },
   {
     "message": "python is interesting.",
     "name": "son",
+    "time": "2025-05-21 11:41",
     "topic": "python"
   },
   {
     "message": "Country music is so good",
     "name": "7781",
+    "time": "2025-05-21 11:41",
     "topic": "music"
   },
   {
     "message": "Canada is a beautiful country.",
     "name": "form",
+    "time": "2025-05-21 11:41",
     "topic": "trivia"
+  },
+  {
+    "message": "timer test",
+    "name": "minute",
+    "time": "2025-05-21 11:43",
+    "topic": "test"
   }
 ]

@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, json, session, redirect
+from datetime import datetime
 import random
 
 app = Flask(__name__)
 app.secret_key = "admin1234"
+app.config['admin'] = ""
 
 def analyze_message(messages):
     emotional_keywords = ["sad", "upset", "tired"]
@@ -36,6 +38,8 @@ def home():
     <a href="/message">Go to Message Page</a><br>
     <a href="/search">Go to Search Page</a><br>
     <a href="/easter_egg">Get a surprise</a><br>
+    <br><br>
+    <a href="/admin">Admin Page</a><br>
     </h1>
     '''
 
@@ -75,6 +79,16 @@ def search():
                 'title': 'Get Secret Message by Code',
                 'url': '/get_message',
                 'content': 'Get the secret messages by a code.'
+            },
+            {
+                'title': 'Admin',
+                'url': '/admin',
+                'content': 'Admin Page to Manage messages and topics.'
+            },
+            {
+                'title': 'Topic',
+                'url': '/topic',
+                'content': 'Leave messages with topics, see and search topic messages.'
             }
         ]
 
@@ -324,7 +338,8 @@ def message():
                 "name": name,
                 "message": msg,
                 "label": label,
-                "reply": reply
+                "reply": reply,
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M")
             }
 
             try:
@@ -379,7 +394,6 @@ def topic():
     <h1>Topic Main Page</h1>
     <h2><a href='/topic_message'>Leave Messages with Topic</a><br><br>
     <a href='/topic_view'>View and Search Messages with Topic</a><br><br>
-    <a href='/topic_admin'>Admin Page</a><br><br>
     <a href='/message'>Back</a><br></h2>
     '''
 
@@ -396,7 +410,8 @@ def topic_message():
             new_entry = {
                 "name": name,
                 "message": msg,
-                "topic": topics
+                "topic": topics,
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M")
             }
 
             try:
@@ -456,7 +471,7 @@ def topic_view():
                 if matches:
                     html = "<h2>Search Results:</h2><br><br>"
                     for match in matches:
-                        html += f"<p><strong>{match['topic']}</strong> -- {match['message']}</p>"
+                        html += f"<p><strong>{match['topic']}</strong> -- {match['message']} -- {match['time']}</p>"
                     html += "<br><br><a href='/topic_view'>Back</a>"
                     return html
 
@@ -481,7 +496,7 @@ def topic_view():
         with open("messages_topic.json", "r", encoding="utf-8") as f:
             all_messages = json.load(f)
         for result in all_messages:
-            msg = (result['message'])
+            msg = (result['message'] + ' -- ' + result['time'])
             msgs.append(msg)
     except FileNotFoundError:
         msgs = "(No messages yet.)"
@@ -496,27 +511,62 @@ def topic_view():
             <input type="submit" value="Submit">
         </form>
         <a href="/topic">Back</a><br><br><br><br>
-        {msg_html}<br>
         </h2>
+        {msg_html}<br>
         '''
+
+@app.route("/admin")
+def admin():
+    app.config['admin'] = ''
+    if not session.get("admin_logged_in"):
+        return redirect("/password_admin")
+
+    return '''
+    <h1>Welcome Admin!<br>
+    <a href="/topic_admin">Managing Topic Messages</a><br>
+    <a href="/normal_admin">Managing Normal Messages</a><br>
+    <a href="/logout_admin">Logout Out</a><br>
+    </h1>
+    '''
+
+@app.route('/normal_admin')
+def normal_admin():
+    if not session.get("admin_logged_in"):
+        return redirect("/password_admin")
+
+    app.config['admin'] = "normal"
+    with open("messages.json", "r", encoding="utf-8") as f:
+        all_messages = json.load(f)
+
+    html = "<h2>Admin Panel: Manage Messages</h2>"
+    html += "<a href='/admin'>Back</a><br><br><br>"
+    for idx, msg in enumerate(all_messages):
+        html += f"<p><strong>{msg['name']}</strong>: {msg['message']} -- {msg['time']}</p>"
+        html += f'''
+            <form method="POST" action="/delete/{idx}">
+                <input type="submit" value="Delete">
+            </form>
+        '''
+    return html
 
 @app.route('/topic_admin')
 def topic_admin():
     if not session.get("admin_logged_in"):
         return redirect("/password_admin")
 
+    app.config['admin'] = "topic"
     with open("messages_topic.json", "r", encoding="utf-8") as f:
         all_messages = json.load(f)
 
-    html = "<h2>Admin Panel: Manage Messages</h2><br>"
+    html = "<h2>Admin Panel: Manage Messages</h2>"
+    html += "<a href='/admin'>Back</a><br><br><br>"
     for idx, msg in enumerate(all_messages):
-        html += f"<p><strong>{msg['name']}</strong>: {msg['message']} -- {msg['topic']}</p>"
+        html += f"<p><strong>{msg['name']}</strong>: {msg['message']} -- {msg['topic']} -- {msg['time']}</p>"
         html += f'''
             <form method="POST" action="/delete/{idx}">
                 <input type="submit" value="Delete">
             </form>
         '''
-    html += "<br><a href='/logout_admin'>Log out</a>"
     return html
 
 @app.route("/delete/<int:idx>", methods=["POST"])
@@ -524,27 +574,45 @@ def delete_message(idx):
     if not session.get("admin_logged_in"):
         return redirect("/password_admin")
 
-    try:
-        with open("messages_topic.json", "r", encoding="utf-8") as f:
-            all_messages = json.load(f)
+    if app.config['admin'] == "normal":
+        try:
+            with open("messages.json", "r", encoding="utf-8") as f:
+                all_messages = json.load(f)
 
-        if 0 <= idx < len(all_messages):
-            all_messages.pop(idx)
+            if 0 <= idx < len(all_messages):
+                all_messages.pop(idx)
 
-        with open("messages_topic.json", "w", encoding="utf-8") as f:
-            json.dump(all_messages, f, indent=2, ensure_ascii=False)
+            with open("messages.json", "w", encoding="utf-8") as f:
+                json.dump(all_messages, f, indent=2, ensure_ascii=False)
 
-    except FileNotFoundError:
-        pass
+        except FileNotFoundError:
+            pass
 
-    return redirect("/topic_admin")
+        return redirect("/normal_admin")
+
+    elif app.config['admin'] == "topic":
+        try:
+            with open("messages_topic.json", "r", encoding="utf-8") as f:
+                all_messages = json.load(f)
+
+            if 0 <= idx < len(all_messages):
+                all_messages.pop(idx)
+
+            with open("messages_topic.json", "w", encoding="utf-8") as f:
+                json.dump(all_messages, f, indent=2, ensure_ascii=False)
+
+        except FileNotFoundError:
+            pass
+
+        return redirect("/topic_admin")
+
 
 @app.route('/password_admin', methods=["GET", "POST"])
 def password_admin():
     if request.method == "POST":
         if request.form.get("password") == "admin1234":
             session["admin_logged_in"] = True
-            return redirect("/topic_admin")
+            return redirect("/admin")
         else:
             return "Wrong password. <a href='/password_admin'>Try again</a>"
 
@@ -560,7 +628,6 @@ def password_admin():
 def logout_admin():
     session.pop("admin_logged_in", None)
     return redirect("/topic")
-
 
 @app.route('/easter_egg', methods=['GET','POST'])
 def easter_egg():
@@ -593,7 +660,7 @@ def show_latest_message():
             all_messages = json.load(f)
             if all_messages:
                 last_list = all_messages[-1]
-                last_message = (last_list['name'] + ' : ' + last_list['message'])
+                last_message = (last_list['name'] + ' : ' + last_list['message'] + ' -- ' + last_list['time'])
             else:
                 last_message = "(No messages yet.)"
     except FileNotFoundError:
