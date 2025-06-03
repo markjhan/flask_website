@@ -699,7 +699,7 @@ def password_admin():
 @app.route("/logout_admin")
 def logout_admin():
     session.pop("admin_logged_in", None)
-    return redirect("/topic")
+    return redirect("/")
 
 @app.route('/easter_egg', methods=['GET','POST'])
 def easter_egg():
