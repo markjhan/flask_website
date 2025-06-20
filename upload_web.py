@@ -140,29 +140,70 @@ def search():
             }
         ]
 
-        for result in search_index:
-            combined_text = (result['title'] + ' ' + result['content']).lower()
-            if msg in combined_text:
-                matches.append(result)
+        if msg:
+            for result in search_index:
+                combined_text = (result['title'] + ' ' + result['content']).lower()
+                if msg in combined_text:
+                    matches.append(result)
 
-        html = ""
+            html = ""
 
-        for match in matches:
-            html += f"<p><a href={match['url']}>{match['title']}</a></p>"
+            for match in matches:
+                html += f"<p><a href={match['url']}>{match['title']}</a></p>"
 
-        if html:
-            return f'''
-                <h2>Search Results:</h2><br>
-                {html}<br><br>
-                <h3><a href='/'>Back to Main Page</a></h3>
-                '''
+            if html:
+                return f'''
+                    <head>
+                        <link rel="stylesheet" href="/static/style_standard_background.css">
+                    </head>
+                    <h2>Search Results:</h2><br>
+                    {html}<br><br>
+                    <h3><a href='/search'>Back</a></h3>
+                    '''
+            else:
+                return '''
+                    <head>
+                        <link rel="stylesheet" href="/static/style_standard_background.css">
+                    </head>
+                    <h2>No results found</h2><br><br>
+                    <h3><a href='/search'>Back</a></h3>
+                    '''
         else:
             return '''
-                <h2>No results found</h2><br><br>
-                <h3><a href='/'>Back to Main Page</a></h3>
-                '''
+                <head>
+                    <link rel="stylesheet" href="/static/style_simple_background_only.css">
+                    <style>
+                        body {
+                            max-width: 800px;
+                            padding: 40px;
+                        }
+                        .link-container {
+                            text-align: center;
+                        }
+                        .link-container a {
+                            font-size: 30px;
+                            color: #1E90FF;
+                            display: inline-block;
+                            text-decoration: none;
+                        }
+                        .link-container a:hover {
+                            color: #10418B;
+                        }
+                    </style>
+                </head>
+                <h1>
+                    Please enter the information you want to search<br><br>
+                    <div class="link-container">
+                        <a href="/search">Back</a>
+                    </div>
+                </h1>
+            '''
 
-    return '''     
+    return ''' 
+        <head>
+            <link rel="stylesheet" href="/static/style_standard_background.css">
+            <link rel="stylesheet" href="/static/style_input_blank.css">
+        </head>    
         <h1>Search Something</h1>
         <form method="POST">
             Search: <br>
@@ -174,54 +215,9 @@ def search():
         <a href='/'>Back to Main Page</a>
         '''
 
-@app.route('/secret', methods=['GET','POST'])
+@app.route('/secret')
 def secret():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        msg = request.form.get('secret message')
-        code = request.form.get('code')
-
-        print(f"Receive：{name} - {msg} - {code}")
-
-        new_entry = {
-            "name": name,
-            "message": msg,
-            "code": code
-        }
-
-        try:
-            with open("secret_messages.json", "r", encoding="utf_8") as f:
-                all_messages = json.load(f)
-        except FileNotFoundError:
-            all_messages = []
-
-        all_messages.append(new_entry)
-
-        with open("secret_messages.json", "w", encoding="utf-8") as f:
-            json.dump(all_messages, f, indent=2, ensure_ascii=False)
-
-        return f"Thank you for your secret, {name}! <br><a href='/message'>Back to Message Page</a>"
-
-    return '''
-    <head><title>Secret Page</title></head>
-    <h2>
-    <form method="POST">
-        Your Name: <br>
-        <input type="text" name="name"><br><br>
-        
-        SecretMessage: <br>
-        <textarea name="secret message" rows="4" cols="40"></textarea><br><br>
-        
-        Secret Code: <br>
-        <input type="password" name="code"><br><br>
-        
-        <input type="submit" value="Submit"><br><br>
-    </form>
-    </h2>
-    <h2>Secret messages will not show on the past messages page.<h2>
-    <br>
-    <a href="/message">Back to Message Page</a>
-    '''
+    return render_template("secret.html")
 
 @app.route('/get_message', methods=['GET','POST'])
 def get_secret_message():
@@ -246,20 +242,50 @@ def get_secret_message():
 
             else:
                 return '''
-                        <p>No message found for this code.</p><br>
-                        <a href='/get_message'>Back</a>
-                        '''
-
-            result_html += "<a href='/get_message'>Back</a>"
-            return result_html
-        else:
-            return '''
-                    <p>Please enter a code.</p><br>
+                    <head>
+                    <link rel="stylesheet" href="/static/style_standard_background.css">
+                    <style>
+                        p {
+                            font-size: 20px;
+                        }
+                    </style>
+                    </head>
+                    <p>No message found for this code.</p><br>
                     <a href='/get_message'>Back</a>
                     '''
 
+            result_html += "<a href='/get_message'>Back</a>"
+            return f'''
+                <head>
+                    <link rel="stylesheet" href="/static/style_standard_background.css">
+                    <style>
+                        p {{
+                            font-size: 20px;
+                        }}
+                    </style>
+                </head>
+                {result_html}
+                '''
+        else:
+            return '''
+                <head>
+                    <link rel="stylesheet" href="/static/style_standard_background.css">
+                    <style>
+                        p {
+                            font-size: 20px;
+                        }
+                    </style>
+                </head>
+                <p>Please enter a code.</p><br>
+                <a href='/get_message'>Back</a>
+                '''
+
     return '''
-    <head><title>Get</title></head>
+    <head>
+        <title>Get</title>
+        <link rel="stylesheet" href="/static/style_standard_background.css">
+        <link rel="stylesheet" href="/static/style_input_blank.css">
+    </head>
     <h1>Enter the code to get secret messages</h1>
     <h2>
     <form method="POST">
@@ -291,25 +317,45 @@ def search_by_name():
                     for match in matches:
                         html += f"<p>{match['message']}</p>"
                     html += "<br><br><a href='/search_by_name'>Back</a>"
-                    return html
+                    return f'''
+                        <head>
+                            <link rel="stylesheet" href="/static/style_standard_background.css">
+                        </head>
+                        {html}
+                        '''
 
                 else:
                     return '''
-                            <h2>No messages found for this name.</h2>
-                            <br><a href='/search_by_name'>Back</a>
-                            '''
-            except FileNotFoundError:
-                return '''
-                        <h2>No message data found.</h2>
-                        <br><a href='/message'>Back</a>
-                        '''
-        else:
-            return '''
-                        <h2>Please enter a name.</h2>
+                        <head>
+                            <link rel="stylesheet" href="/static/style_standard_background.css">
+                        </head>
+                        <h2>No messages found for this name.</h2>
                         <br><a href='/search_by_name'>Back</a>
                         '''
+            except FileNotFoundError:
+                return '''
+                    <h2>No message data found.</h2>
+                    <br><a href='/message'>Back</a>
+                    '''
+        else:
+            return '''
+                <head>
+                    <link rel="stylesheet" href="/static/style_standard_background.css">
+                </head>
+                <h2>Please enter a name.</h2>
+                <br><a href='/search_by_name'>Back</a>
+                '''
 
     return '''
+    <head>
+        <link rel="stylesheet" href="/static/style_standard_background.css">
+        <link rel="stylesheet" href="/static/style_input_blank.css">
+        <style>
+            p {
+                font-size: 20px;
+            }
+        </style>
+    </head>
     <h1>Enter the Name</h1>
     <h2>
     <form method="POST">
@@ -324,205 +370,282 @@ def search_by_name():
 
 @app.route('/about')
 def about():
-    return '''
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>About This Website</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: auto;
-                padding: 40px;
-                background-color: #E0F8F7;
-                color: #2C3E50;
-            }
-            h1 {
-                color: #333333;
-            }
-            p {
-                font-size: 20px;
-            }
-            a {
-                display: block;
-                font-size: 17px;
-                text-decoration: none;
-                color: #1E90FF;
-            }
-            a:hover {
-                color: #104E8B;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>About This Website</h1>
-    
-        <p>
-            I built this website as part of my journey into programming.
-        </p>
-    
-        <p>
-            This project is my first step into web development.
-            I used Python and Flask to build a simple website where users can leave messages.
-            The idea may be small, but it's completely mine — written, tested, and deployed by me. 
-            The most interesting part is that I learned all of these with chatGPT, and I would like to say it is the best teacher.
-        </p>
-    
-        <p>
-            I plan to improve this site over time, adding features like a message board, chatbot responses, and even AI tools.
-            For now, it's proof that even without a traditional school path, I can learn and build.
-        </p>
-    
-        <h1>About Me</h1>
-        
-        <p>
-            Hi, I'm someone who left school in 8th grade and have been self-studying ever since.<br>
-            I started learning Python because I wanted to create real things, not just follow tutorials.<br>
-            My hobby is playing the guitar, travelling, and trying different kinds of food.<br>
-            I used to live in Japan for 6 months just by my self, and I'm now living in Vancouver, BC alone as well.<br>
-            I'm really proud of myself, cause I applied the visa on my own, and it successfully been approved.<br>
-            I was 17 when I wrote all of these. I hope you like this website.<br>
-        </p>
-        
-        <p>
-            <h3>Thank you for visiting.<h3>
-            <h6>----Written on April 13th, 2025.<h6>
-        </p>    
-    </body>
-    </html>
-
-    <a href="/">Back to Main Page</a>
-    '''
+    return render_template("about.html")
 
 @app.route('/message', methods=['GET','POST'])
 def message():
     if request.method == 'POST':
         name = request.form.get('name')
         msg = request.form.get('message')
+        is_secret = request.form.get('is_secret')
+        is_topic = request.form.get('is_topic')
 
         if name and msg:
-            print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
+            if is_secret:
+                code = request.form.get('code')
+                if code:
+                    print(f"Receive：{name} - {msg} - {code}")
 
-            label, reply = analyze_message(msg)
+                    new_entry = {
+                        "name": name,
+                        "message": msg,
+                        "code": code
+                    }
 
-            new_entry = {
-                "name": name,
-                "message": msg,
-                "label": label,
-                "reply": reply,
-                "time": datetime.now().strftime("%Y-%m-%d %H:%M")
-            }
+                    try:
+                        with open("secret_messages.json", "r", encoding="utf_8") as f:
+                            all_messages = json.load(f)
+                    except FileNotFoundError:
+                        all_messages = []
 
-            try:
-                with open("messages.json", "r", encoding="utf_8") as f:
-                    all_messages = json.load(f)
-            except FileNotFoundError:
-                all_messages = []
+                    all_messages.append(new_entry)
 
-            all_messages.append(new_entry)
+                    with open("secret_messages.json", "w", encoding="utf-8") as f:
+                        json.dump(all_messages, f, indent=2, ensure_ascii=False)
 
-            with open("messages.json", "w", encoding="utf-8") as f:
-                json.dump(all_messages, f, indent=2, ensure_ascii=False)
-        else:
-            return '''
-                    <h2>Please enter your name and message.</h2><br>
-                    <a href='/message'>Back</a>
+                    return f'''
+                        <head>
+                            <link rel="stylesheet" href="/static/style_standard_background.css">
+                            <style>
+                                p {{
+                                    font-size: 26px;
+                                    padding: 80px;
+                                }}
+                            </style>
+                        </head>
+                        <body>
+                            <p>Thank you for your secret, {name}! <br><br><br><br><a href='/message'>Back to Message Page</a></p>
+                        </body>
+                        '''
+                else:
+                    return '''
+                        <head>
+                            <link rel="stylesheet" href="/static/style_only_words.css">
+                        </head>
+                        <body>
+                            <p>Please enter a code.</p>
+                            <a href="/message">Back</a>
+                        </body>
                     '''
 
-        return f"""
-                <h2>Message received!</h2><br>
-                <p><strong>You said: </strong>{msg}</p>
-                <p><strong>Bot replied: </strong>{reply}</p>
-                <a href='/message'>Back</a>"""
+            elif is_topic:
+                topics = request.form.get('topic')
 
-    return '''
-    <head>
-    <title>Message Board</title>
-    </head>
-    <h1>Message Board</h1>
-    <form method="POST">
-        Your Name:<br>
-        <input type="text" name="name"><br><br>
+                if topics:
+                    print(f"Receive：{name} - {msg} - {topics}")
 
-        Message:<br>
-        <textarea name="message" rows="4" cols="40"></textarea><br><br>
+                    new_entry = {
+                        "name": name,
+                        "message": msg,
+                        "topic": topics,
+                        "time": datetime.now().strftime("%Y-%m-%d %H:%M")
+                    }
 
-        <input type="submit" value="Submit">
-    </form>
-    <br>
-    <a href="/">Back to Main Page</a><br>
-    <a href="/secret">Send a Secret Message</a><br>
-    <a href="/latest">Check the latest message</a><br>
-    <a href='/get_message'>Get Messages by Code</a><br>
-    <a href='/search_by_name'>Search Messages by name</a><br>
-    <a href='/topic'>Go to Topic Main Page</a><br>
-    '''
+                    try:
+                        with open("messages_topic.json", "r", encoding="utf_8") as f:
+                            all_messages = json.load(f)
+                    except FileNotFoundError:
+                        all_messages = []
 
-@app.route('/topic')
-def topic():
-    return '''
-    <head><title>Topic Main Page</title></head>
-    <h1>Topic Main Page</h1>
-    <h2><a href='/topic_message'>Leave Messages with Topic</a><br><br>
-    <a href='/topic_view'>View and Search Messages with Topic</a><br><br>
-    <a href='/message'>Back</a><br></h2>
-    '''
+                    all_messages.append(new_entry)
 
-@app.route('/topic_message', methods=['GET', 'POST'])
-def topic_message():
-    if request.method == 'POST':
-        name = request.form.get('name_topic')
-        msg = request.form.get('message_topic')
-        topics = request.form.get('topic')
+                    with open("messages_topic.json", "w", encoding="utf-8") as f:
+                        json.dump(all_messages, f, indent=2, ensure_ascii=False)
 
-        if name and msg and topics:
-            print(f"Receive：{name} - {msg} - {topics}")
+                    return """
+                        <head>
+                            <link rel="stylesheet" href="/static/style_only_words.css">
+                        </head>
+                        <body>
+                            <h2>Topic Message Received!</h2><br>
+                            <a href='/message'>Back</a>
+                        </body>
+                    """
+                else:
+                    return '''
+                        <head>
+                            <link rel="stylesheet" href="/static/style_only_words.css">
+                        </head>
+                        <body>
+                            <h2>Please enter a topic.</h2><br>
+                            <a href='/message'>Back</a>
+                        </body>
+                    '''
 
-            new_entry = {
-                "name": name,
-                "message": msg,
-                "topic": topics,
-                "time": datetime.now().strftime("%Y-%m-%d %H:%M")
-            }
+            else:
+                print(f"Receive：{name} - {msg}")  # To confirm receive the message or not
 
-            try:
-                with open("messages_topic.json", "r", encoding="utf_8") as f:
-                    all_messages = json.load(f)
-            except FileNotFoundError:
-                all_messages = []
+                label, reply = analyze_message(msg)
 
-            all_messages.append(new_entry)
+                new_entry = {
+                    "name": name,
+                    "message": msg,
+                    "label": label,
+                    "reply": reply,
+                    "time": datetime.now().strftime("%Y-%m-%d %H:%M")
+                }
 
-            with open("messages_topic.json", "w", encoding="utf-8") as f:
-                json.dump(all_messages, f, indent=2, ensure_ascii=False)
+                try:
+                    with open("messages.json", "r", encoding="utf_8") as f:
+                        all_messages = json.load(f)
+                except FileNotFoundError:
+                    all_messages = []
+
+                all_messages.append(new_entry)
+
+                with open("messages.json", "w", encoding="utf-8") as f:
+                    json.dump(all_messages, f, indent=2, ensure_ascii=False)
+
+                return f"""
+                        <head>
+                            <link rel="stylesheet" href="/static/style.css">
+                            <style>
+                                body {{
+                                    max-width: 800px;
+                                    padding: 40px;
+                                    text-align: center;
+                                }}
+                                p {{
+                                    font-size: 18px;
+                                }}
+                                a {{
+                                    font-size: 18px;
+                                }}
+                            </style>
+                        </head>
+                        <body>
+                            <h2>Message received!</h2><br>
+                            <p><strong>You said: </strong>{msg}</p>
+                            <p><strong>Bot replied: </strong>{reply}</p>
+                            <a href='/message'>Back</a>
+                        </body>
+                        """
+
         else:
             return '''
-                    <h2>Please fill in all fields.</h2><br>
-                    <a href='/topic_message'>Back</a>
+                    <head>
+                        <link rel="stylesheet" href="/static/style.css">
+                        <style>
+                            body {
+                                max-width: 500px;
+                                padding: 40px;
+                                text-align: center;
+                            }
+                            a {
+                                font-size: 20px;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Please enter your name and message.</h2><br>
+                        <a href='/message'>Back</a>
+                    </body>
                     '''
-        return f"""
-                        <h2>Message received!</h2><br>
-                        <a href='/topic'>Back</a>"""
 
     return '''
+    <!DOCTYPE html>
+    <html>
     <head>
-    <title>Topic Message Board</title>
-    </head>
-    <h1>Topic Message Board</h1>
-    <form method="POST">
-        Your Name:<br>
-        <input type="text" name="name_topic"><br><br>
+        <title>Message Board</title>
+        <link rel="stylesheet" href="/static/style_simple_background_only.css">
+        <link rel="stylesheet" href="/static/style_input_blank.css">
+        <style>
+            body {
+                max-width: 300px;
+                padding: 40px;
+            }
+            h1 {
+                color: #121212;
+            }
+            a {
+                margin: 0px 0;
+                font-size: 16px;
+                color: #1E90FF;
+            }
+            a:hover {
+                color: #10418B;
+            }
+            .link-container {
+                text-align: center;
+            }
+            .link-container a {
+                font-size: 17px;
+                color: #1E90FF;
+                display: block;
+                text-decoration: none;
+            }
+            .link-container a:hover {
+                color: #10418B;
+            }
 
-        Message:<br>
-        <textarea name="message_topic" rows="4" cols="40"></textarea><br><br>
+        </style>
+    </head>
+    
+    <body>
+        <h1>Message Board</h1>
+        <form method="POST">
+            Your Name:<br>
+            <input type="text" name="name"><br><br>
+    
+            Message:<br>
+            <textarea name="message" rows="4" cols="40"></textarea><br><br>
+            
+            <input type="checkbox" id="secret" name="is_secret" onclick="updateFields('secret')">
+            Send as <a href="/secret">Secret Message</a>?<br><br>
+            
+            <div id="codeField" style="display: none; margin-top: 10px;">
+                <label for="secret_code">Code:</label>
+                <input type="text" id="secret_code" name="code">
+            </div>
+            
+            <input type="checkbox" id="topic" name="is_topic" onclick="updateFields('topic')">
+            Send as a Topic Message?<br><br>
+            
+            <div id="topicField" style="display: none; margin-top: 10px;">
+                <label for="topic_input">Topic:</label>
+                <input type="text" id="topic_input" name="topic">
+            </div>
+    
+            <input type="submit" value="Submit">
+        </form>
         
-        Topic:<br>
-        <input type="text" name="topic"><br><br>
-
-        <input type="submit" value="Submit">
-    </form><br>
-    <a href="/topic">Back</a><br>
+        <br><br><br><br><br><br><br><br>
+        <div class="link-container">
+            <a href="/">Back to Main Page</a><br>
+            <a href="/latest">Check the latest message</a><br>
+            <a href='/get_message'>Get Messages by Code</a><br>
+            <a href='/search_by_name'>Search Messages by name</a><br>
+            <a href='/topic_view'>View and Search Messages with Topic</a><br>
+        </div>
+        
+        <script>
+            function updateFields(selected) {
+                const secretCheckbox = document.getElementById('secret');
+                const codeField = document.getElementById('codeField');
+                const topicCheckbox = document.getElementById('topic');
+                const topicField = document.getElementById('topicField');
+                
+                if (selected === 'secret') {
+                    document.getElementById('topic').checked = false;
+                } else if (selected === 'topic') {
+                    document.getElementById('secret').checked = false;
+                }
+                
+                if (secretCheckbox.checked) {
+                    codeField.style.display = 'block';
+                } else {
+                    codeField.style.display = 'none'; 
+                }
+                
+                if (topicCheckbox.checked) {
+                    topicField.style.display = 'block';
+                } else {
+                    topicField.style.display = 'none'; 
+                }
+            }
+        </script>
+    </body>
+    </html>
     '''
 
 @app.route('/topic_view', methods=['GET', 'POST'])
@@ -545,13 +668,25 @@ def topic_view():
                     for match in matches:
                         html += f"<p><strong>{match['topic']}</strong> -- {match['message']} -- {match['time']}</p>"
                     html += "<br><br><a href='/topic_view'>Back</a>"
-                    return html
+                    return f'''
+                        <head>
+                            <link rel="stylesheet" href="/static/style_standard_background.css">
+                        </head>
+                        <body>
+                            {html}
+                        </body>
+                    '''
 
                 else:
                     return '''
+                        <head>
+                            <link rel="stylesheet" href="/static/style_only_words.css">
+                        </head>
+                        <body>
                             <h2>No messages found for this topic.</h2>
                             <br><a href='/topic_view'>Back</a>
-                            '''
+                        </body>
+                        '''
             except FileNotFoundError:
                 return '''
                         <h2>No message data found.</h2>
@@ -559,9 +694,14 @@ def topic_view():
                         '''
         else:
             return '''
-                        <h2>Please enter a topic.</h2>
-                        <br><a href='/topic'>Back</a>
-                        '''
+                <head>
+                    <link rel="stylesheet" href="/static/style_only_words.css">
+                </head>
+                <body>
+                    <h2>Please enter a topic.</h2>
+                    <br><a href='/topic_view'>Back</a>
+                </body>
+                '''
 
     msgs = []
     try:
@@ -573,18 +713,25 @@ def topic_view():
     except FileNotFoundError:
         msgs = "(No messages yet.)"
     msg_html = "<br>".join(msgs)
-    return f'''
-        <h1>Enter a Topic</h1>
-        <h2>
-        <form method="POST">
-            Topic: <br>
-            <input type="text" name="search topic"><br><br>
 
-            <input type="submit" value="Submit">
-        </form>
-        <a href="/topic">Back</a><br><br><br><br>
-        </h2>
-        {msg_html}<br>
+    return f'''
+        <head>
+            <link rel="stylesheet" href="/static/style_standard_background.css">
+            <link rel="stylesheet" href="/static/style_input_blank.css">
+        </head>
+        <body>
+            <h1>Enter a Topic</h1>
+            <h2>
+            <form method="POST">
+                Topic: <br>
+                <input type="text" name="search topic"><br><br>
+    
+                <input type="submit" value="Submit">
+            </form>
+            <a href="/message">Back</a><br><br><br><br>
+            </h2>
+            {msg_html}<br>
+        </body>
         '''
 
 @app.route("/admin")
@@ -594,11 +741,24 @@ def admin():
         return redirect("/password_admin")
 
     return '''
-    <h1>Welcome Admin!<br>
-    <a href="/topic_admin">Managing Topic Messages</a><br>
-    <a href="/normal_admin">Managing Normal Messages</a><br>
-    <a href="/logout_admin">Logout Out</a><br>
-    </h1>
+    <head>
+        <link rel="stylesheet" href="/static/style_admin.css">
+        <style>
+            a {
+                font-size: 30px;
+            }
+            h1 {
+                color: #FFFFFF;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Welcome Admin!<br><br>
+        <a href="/topic_admin">Managing Topic Messages</a><br><br>
+        <a href="/normal_admin">Managing Normal Messages</a><br><br>
+        <a href="/logout_admin">Logout Out</a><br><br>
+        </h1>
+    </body>
     '''
 
 @app.route('/normal_admin')
@@ -610,16 +770,40 @@ def normal_admin():
     with open("messages.json", "r", encoding="utf-8") as f:
         all_messages = json.load(f)
 
-    html = "<h2>Admin Panel: Manage Messages</h2>"
+    html = "<h1>Admin Panel: Manage Messages</h1>"
     html += "<a href='/admin'>Back</a><br><br><br>"
     for idx, msg in enumerate(all_messages):
-        html += f"<p><strong>{msg['name']}</strong>: {msg['message']} -- {msg['time']}</p>"
         html += f'''
-            <form method="POST" action="/delete/{idx}">
-                <input type="submit" value="Delete">
-            </form>
+            <div style="display: flex; justify-content: center;">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <p><span><strong>{msg['name']}</strong>: {msg['message']} -- {msg['time']}</span>
+                    <form method="POST" action="/delete/{idx}" style="margin-left: 25px;">
+                        <input type="submit" value="Delete">
+                    </form></p>
+                </div>
+            </div>
         '''
-    return html
+    return f'''
+        <head>
+            <link rel="stylesheet" href="/static/style_admin.css">
+            <link rel="stylesheet" href="/static/style_admin_delete_button.css">
+            <style>
+                a {{
+                    font-size: 27px;
+                }}
+                p {{
+                    font-size: 18px;
+                    color: #FFFFFF;
+                }}
+                h1 {{
+                    color: #FFFFFF;
+                }}
+            </style>
+        </head>
+        <body>
+           {html}
+        </body>
+    '''
 
 @app.route('/topic_admin')
 def topic_admin():
@@ -630,16 +814,40 @@ def topic_admin():
     with open("messages_topic.json", "r", encoding="utf-8") as f:
         all_messages = json.load(f)
 
-    html = "<h2>Admin Panel: Manage Messages</h2>"
+    html = "<h1>Admin Panel: Manage Topic Messages</h1>"
     html += "<a href='/admin'>Back</a><br><br><br>"
     for idx, msg in enumerate(all_messages):
-        html += f"<p><strong>{msg['name']}</strong>: {msg['message']} -- {msg['topic']} -- {msg['time']}</p>"
         html += f'''
-            <form method="POST" action="/delete/{idx}">
-                <input type="submit" value="Delete">
-            </form>
+            <div style="display: flex; justify-content: center;">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <p><span><strong>{msg['name']}</strong>: {msg['message']} -- {msg['topic']} -- {msg['time']}</span>
+                    <form method="POST" action="/delete/{idx}" style="margin-left: 25px;">
+                        <input type="submit" value="Delete">
+                    </form></p>
+                </div>
+            </div>
         '''
-    return html
+    return f'''
+        <head>
+            <link rel="stylesheet" href="/static/style_admin.css">
+            <link rel="stylesheet" href="/static/style_admin_delete_button.css">
+            <style>
+                a {{
+                    font-size: 27px;
+                }}
+                p {{
+                    font-size: 18px;
+                    color: #FFFFFF;
+                }}
+                h1 {{
+                    color: #FFFFFF;
+                }}
+            </style>
+        </head>
+        <body>
+            {html}
+        </body>
+    '''
 
 @app.route("/delete/<int:idx>", methods=["POST"])
 def delete_message(idx):
@@ -686,15 +894,27 @@ def password_admin():
             session["admin_logged_in"] = True
             return redirect("/admin")
         else:
-            return "Wrong password. <a href='/password_admin'>Try again</a>"
+            return '''
+                <head>
+                    <link rel="stylesheet" href="/static/style_standard_background.css">
+                </head>
+                <body>
+                    Wrong password. <a href='/password_admin'>Try again</a>
+                </body>
+            '''
 
     return '''
+        <head>
+            <link rel="stylesheet" href="/static/style_standard_background.css">
+        </head>
+        <body>
             <form method="POST">
-                Admin Password: <input type="password" name="password"><br>
+                Admin Password: <input type="password" name="password"><br><br>
                 <input type="submit" value="Login">
             </form>
             <a href='/'>Back</a>
-        '''
+        </body>
+    '''
 
 @app.route("/logout_admin")
 def logout_admin():
@@ -709,21 +929,21 @@ def easter_egg():
             "Every expert was once a beginner.",
             "Flask is cool, and so are you.",
             "One small step today is a big step tomorrow.",
-            "You're writing Python like a real developer!"
+            "You're writing Python like a real developer!",
+            "No matter where you start, you can build something amazing.",
+            "This little site proves that learning by doing works — you can do it too.",
+            "You don’t need permission to learn. Just start.",
+            "This project began with zero experience. Yours can too.",
+            "If you're curious enough to click this, you're curious enough to create.",
+            "You don't need a classroom to build something real.",
+            "One line of code at a time — that’s how anything starts.",
+            "Everyone begins somewhere. This is a somewhere.",
+            "The person who built this site used to know nothing about Flask — and now look."
         ]
         chosen = random.choice(facts)
-        return f'''
-            <h2>Your random message: </h2>
-            <p>{chosen}</p>
-            <a href='/easter_egg'>Back</a>
-            '''
+        return render_template("easter_egg.html", message=chosen)
 
-    return '''
-    <form method="POST">
-        <input type="submit" value="Get a Random Message">
-    </form>
-    <br><a href="/">Back</a>
-    '''
+    return render_template("easter_egg.html")
 
 @app.route('/latest')
 def show_latest_message():
@@ -739,7 +959,15 @@ def show_latest_message():
         last_message = "(No messages yet.)"
 
     return f'''
-    <head><title>Latest Message</title></head>
+    <head>
+        <title>Latest Message</title>
+        <link rel="stylesheet" href="/static/style_standard_background.css">
+        <style>
+            p {{
+                font-size: 18px;
+            }}
+        </style>
+    </head>
     <h2>Latest message:</h2><p>{last_message}</p><br>
     <a href='/message'>Back to Message Page</a>
     '''

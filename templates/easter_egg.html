@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Easter Egg</title>
+    <link rel="stylesheet" href="/static/style_standard_background.css">
+    <style>
+        input[type="submit"] {
+            background-color: #2C3E50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #3E4E5E;
+        }
+        p {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    {% if message %}
+        <h2>Your random message:</h2>
+        <p>{{ message }}</p>
+        <a href="/easter_egg">Back</a>
+    {% else %}
+        <form method="POST">
+            <input type="submit" value="Get a Random Message">
+        </form>
+        <br><a href="/">Back</a>
+    {% endif %}
+</body>
+</html>

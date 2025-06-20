@@ -1,0 +1,22 @@
+body {
+    background-color: #1A3D2F;
+    font-family: Arial, sans-serif;
+    margin: auto;
+    text-align: center;
+    max-width: 2000px;
+    padding: 40px;
+}
+
+a {
+    color: #4CAF50;
+    text-decoration: none;
+    display: inline-block;
+}
+
+a:hover {
+    color: #81C784;
+}
+
+h1 {
+    font-size: 50px;
+}
