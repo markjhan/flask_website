@@ -11,7 +11,7 @@ This is the first web project I built using Flask — a tiny website that accept
 - Python 3
 - Flask
 - HTML
-- css
+- CSS
 - JavaScript
 - Render (for deployment)
 - Git + GitHub
