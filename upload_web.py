@@ -171,25 +171,7 @@ def search():
         else:
             return '''
                 <head>
-                    <link rel="stylesheet" href="/static/style_simple_background_only.css">
-                    <style>
-                        body {
-                            max-width: 800px;
-                            padding: 40px;
-                        }
-                        .link-container {
-                            text-align: center;
-                        }
-                        .link-container a {
-                            font-size: 30px;
-                            color: #1E90FF;
-                            display: inline-block;
-                            text-decoration: none;
-                        }
-                        .link-container a:hover {
-                            color: #10418B;
-                        }
-                    </style>
+                    <link rel="stylesheet" href="/static/style_searchPageNoEnter.css">
                 </head>
                 <h1>
                     Please enter the information you want to search<br><br>
@@ -236,19 +218,14 @@ def get_secret_message():
                 return '<p>No message found yet.</p>'
 
             if matches:
-                result_html = f"<h2>Message for Code: {code_input}</h2>"
+                result_html = f"<h1>Message for Code: {code_input}</h1>"
                 for msg in matches:
-                    result_html += f"<h3><p>{msg}</p></h3>"
+                    result_html += f"<p>{msg}</p>"
 
             else:
                 return '''
                     <head>
-                    <link rel="stylesheet" href="/static/style_standard_background.css">
-                    <style>
-                        p {
-                            font-size: 20px;
-                        }
-                    </style>
+                        <link rel="stylesheet" href="/static/style_getMessagePage.css">
                     </head>
                     <p>No message found for this code.</p><br>
                     <a href='/get_message'>Back</a>
@@ -257,24 +234,14 @@ def get_secret_message():
             result_html += "<a href='/get_message'>Back</a>"
             return f'''
                 <head>
-                    <link rel="stylesheet" href="/static/style_standard_background.css">
-                    <style>
-                        p {{
-                            font-size: 20px;
-                        }}
-                    </style>
+                    <link rel="stylesheet" href="/static/style_getMessagePage.css">
                 </head>
                 {result_html}
                 '''
         else:
             return '''
                 <head>
-                    <link rel="stylesheet" href="/static/style_standard_background.css">
-                    <style>
-                        p {
-                            font-size: 20px;
-                        }
-                    </style>
+                    <link rel="stylesheet" href="/static/style_getMessagePage.css">
                 </head>
                 <p>Please enter a code.</p><br>
                 <a href='/get_message'>Back</a>
@@ -547,38 +514,7 @@ def message():
     <html>
     <head>
         <title>Message Board</title>
-        <link rel="stylesheet" href="/static/style_simple_background_only.css">
-        <link rel="stylesheet" href="/static/style_input_blank.css">
-        <style>
-            body {
-                max-width: 300px;
-                padding: 40px;
-            }
-            h1 {
-                color: #121212;
-            }
-            a {
-                margin: 0px 0;
-                font-size: 16px;
-                color: #1E90FF;
-            }
-            a:hover {
-                color: #10418B;
-            }
-            .link-container {
-                text-align: center;
-            }
-            .link-container a {
-                font-size: 17px;
-                color: #1E90FF;
-                display: block;
-                text-decoration: none;
-            }
-            .link-container a:hover {
-                color: #10418B;
-            }
-
-        </style>
+        <link rel="stylesheet" href="/static/style_messagePage.css">
     </head>
     
     <body>

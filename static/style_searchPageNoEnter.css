@@ -1,0 +1,26 @@
+body {
+    background-color: #E0F8F7;
+    font-family: Arial, sans-serif;
+    margin: auto;
+    max-width: 800px;
+    padding: 40px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.link-container {
+    text-align: center;
+}
+
+.link-container a {
+    font-size: 30px;
+    color: #1E90FF;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.link-container a:hover {
+   color: #10418B;
+}
