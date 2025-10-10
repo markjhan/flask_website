@@ -33,7 +33,7 @@ Then visit: [http://localhost:9090](http://localhost:9090)
 
 ## About Me
 
-I'm learning programming on my own, starting from zero, with the dream of becoming a real developer — not just by title, but by skill.
+I'm learning programming on my own, starting from zero, with the dream of becoming a real developer.
 
 If you're someone who works in tech, education, or you're just curious — feel free to explore this project or give feedback. I'd love to connect.
 
