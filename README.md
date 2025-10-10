@@ -31,15 +31,6 @@ Then visit: [http://localhost:9090](http://localhost:9090)
 
 ---
 
-## Why This Project Matters
-
-This project may be small, but it represents something big —  
-I started building real things from scratch, even without traditional schooling.
-
-I'm still learning, but I know I'm moving forward — one project at a time.
-
----
-
 ## About Me
 
 I'm learning programming on my own, starting from zero, with the dream of becoming a real developer — not just by title, but by skill.
