@@ -31,6 +31,9 @@ Then visit: [http://localhost:9090](http://localhost:9090)
 
 ---
 
+If you want to preview the general layout of the website, you can visit: https://flask-website-pi.vercel.app/. 
+Please note that this deployment is only for layout testing, so some features may not be fully functional.
+
 ## About Me
 
 I'm learning programming on my own, starting from zero, with the dream of becoming a real developer.
